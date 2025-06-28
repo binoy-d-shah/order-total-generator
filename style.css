@@ -1,0 +1,76 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    line-height: 1.6;
+}
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    box-sizing: border-box; /* Include padding in width */
+}
+.btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+.btn:hover {
+    background-color: #0056b3;
+}
+.loading-indicator, .csv-generating-indicator {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+    color: #007bff;
+}
+.message-box {
+    display: none; /* Hidden by default */
+}
+
+/* Styles for CSV Table */
+#csvTable th, #csvTable td {
+    border: 1px solid #e0e0e0;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+#csvTable thead th {
+    background-color: #f8f8f8;
+    font-weight: 600;
+    color: #555;
+}
+
+#csvTable tbody tr:nth-child(even) {
+    background-color: #fcfcfc;
+}
+
+#csvTable tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+#csvTable tfoot {
+    font-weight: bold;
+    background-color: #e9e9e9;
+}

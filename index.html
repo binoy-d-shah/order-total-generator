@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            box-sizing: border-box; /* Include padding in width */
+        }
+        .btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        /* .order-card and .download-btn-container styles are no longer relevant if single order view is removed */
+        /*
+        .order-card {
+            background-color: #f9f9f9;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .download-btn-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table th, table td {
+            border: 1px solid #e1e1e1;
+            padding: 10px;
+            text-align: left;
+        }
+        table th {
+            background-color: #eef2f5;
+            font-weight: bold;
+        }
+        .loading-indicator { /* image-generating-indicator removed */
+            text-align: center;
+            padding: 15px;
+            background-color: #e0f7fa;
+            border: 1px solid #b2ebf2;
+            border-radius: 5px;
+            margin-top: 20px;
+            color: #00796b;
+        }
+        .message-box {
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .message-box.hidden {
+            display: none;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Order Management Dashboard</h1>
+
+        <div class="grid grid-cols-1 gap-6">
+            <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Fetch Orders by Date Range (Table View)</h2>
+                <div class="form-group">
+                    <label for="startDate" class="block text-gray-700 text-sm font-bold mb-2">Start Date:</label>
+                    <input type="date" id="startDate" class="shadow-sm p-2 focus:ring focus:ring-blue-200 focus:border-blue-500">
+                </div>
+                <div class="form-group">
+                    <label for="endDate" class="block text-gray-700 text-sm font-bold mb-2">End Date:</label>
+                    <input type="date" id="endDate" class="shadow-sm p-2 focus:ring focus:ring-blue-200 focus:border-blue-500">
+                </div>
+                <button id="fetchOrdersByRangeBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Fetch Orders for Table</button>
+                <div id="csvGeneratingIndicator" class="loading-indicator hidden mt-4">
+                    <p>Fetching & preparing table data...</p>
+                </div>
+                <button id="copyTableContentsBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 mt-4 hidden">Copy Table Contents</button>
+                
+                <div id="csvTableContainer" class="mt-8 hidden">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Orders Data</h3>
+                    </div>
+            </div>
+
+            </div>
+
+        <div id="loadingIndicator" class="loading-indicator hidden">
+            <p>Loading orders...</p>
+        </div>
+        <div id="messageBox" class="message-box hidden"></div>
+
+        </div>
+
+    <script src="config.js" type="module"></script>
+    <script src="utils.js" type="module"></script>
+    <script src="ui-renderer.js" type="module"></script>
+    <script src="order-api.js" type="module"></script>
+    <script src="app.js" type="module"></script>
+</body>
+</html>
