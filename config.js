@@ -1,6 +1,6 @@
 // config.js
 const config = {
-    baseUrl: 'https://xmbmcqrij4.execute-api.eu-central-1.amazonaws.com/prod/',
+    baseUrl: 'https://xmbmcqrij4.execute-api.eu-central-1.amazonaws.com/prod',
 
     // IMPORTANT: Replace these with your actual tokens for the application to function.
     // Ensure these tokens are kept secure and not exposed in public repositories.
