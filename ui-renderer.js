@@ -18,7 +18,7 @@ function renderOrdersToTable(orderData, grandBaseOrderAmount, grandAdditionalTot
 
     let tableHtml = `
         <div class="mb-4 text-xl font-bold text-gray-800 text-center">
-            Grand Total (Amount - without fees): €${grandBaseOrderAmount.toFixed(2)}
+            Grand Total (Amount - without fees and discounts): €${grandBaseOrderAmount.toFixed(2)}
         </div>
         <div class="mb-4 text-xl font-bold text-gray-800 text-center">
             Grand Total (Total Amount): €${grandAdditionalTotalAmount.toFixed(2)}
@@ -28,9 +28,9 @@ function renderOrdersToTable(orderData, grandBaseOrderAmount, grandAdditionalTot
                 <tr class="bg-gray-200 text-gray-700">
                     <th class="py-2 px-4 border-b">S.No.</th>
                     <th class="py-2 px-4 border-b">Order Number</th>
-                    <th class="py-2 px-4 border-b">Date</th> <th class="py-2 px-4 border-b">Customer Name</th>
-                    <th class="py-2 px-4 border-b">Amount</th>
-                    <th class="py-2 px-4 border-b">Total Amount</th>
+                    <th class="py-2 px-4 border-b">Date</th>
+                    <th class="py-2 px-4 border-b">Customer Name</th>
+                    <th class="py-2 px-4 border-b">Amount (without fees and discounts)</th> <th class="py-2 px-4 border-b">Total Amount</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,7 +41,8 @@ function renderOrdersToTable(orderData, grandBaseOrderAmount, grandAdditionalTot
             <tr class="hover:bg-gray-50">
                 <td class="py-2 px-4 border-b text-center">${order.serialNumber}</td>
                 <td class="py-2 px-4 border-b">${order.orderNumber}</td>
-                <td class="py-2 px-4 border-b">${order.deliveryDate}</td> <td class="py-2 px-4 border-b">${order.customerName}</td>
+                <td class="py-2 px-4 border-b">${order.deliveryDate}</td>
+                <td class="py-2 px-4 border-b">${order.customerName}</td>
                 <td class="py-2 px-4 border-b">€${order.baseOrderAmount ? order.baseOrderAmount.toFixed(2) : '0.00'}</td>
                 <td class="py-2 px-4 border-b">€${order.additionalTotalAmount ? order.additionalTotalAmount.toFixed(2) : '0.00'}</td>
             </tr>

@@ -149,7 +149,7 @@ async function performDailyFetchWithRetry(idToken, dateToFetch, retries = 3, ini
  * @param {HTMLElement} csvGeneratingIndicator The CSV generating indicator HTML element.
  * @param {HTMLElement} copyTableContentsBtn The copy table contents button.
  * @param {HTMLElement} csvTableContainer The container for the CSV table.
- * @returns {Promise<Array<Object>>} A promise that resolves with the processed order data for CSV, including serial numbers.
+ * @returns {Promise<Object>} A promise that resolves with an object containing processed order data for CSV, including serial numbers, and grand totals.
  */
 async function fetchOrdersByDateRange(startDateString, endDateString, csvGeneratingIndicator, copyTableContentsBtn, csvTableContainer) {
     displayMessage('', 'info').classList.add('hidden');
@@ -239,7 +239,12 @@ async function fetchOrdersByDateRange(startDateString, endDateString, csvGenerat
         // Render to HTML table using the allAggregatedOrders array
         renderOrdersToTable(allAggregatedOrders, grandBaseOrderAmount, grandAdditionalTotalAmount, csvTableContainer);
 
-        return allAggregatedOrders;
+        // Return the processed orders and grand totals
+        return {
+            orders: allAggregatedOrders,
+            grandBaseOrderAmount: grandBaseOrderAmount,
+            grandAdditionalTotalAmount: grandAdditionalTotalAmount
+        };
 
     } catch (error) {
         console.error('Error during order processing:', error);

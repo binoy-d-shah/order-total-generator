@@ -1,84 +1,107 @@
 // app.js
-import { displayMessage } from './utils.js'; // downloadDataUrlAsFile is no longer needed
+import { displayMessage } from './utils.js';
 import { fetchOrdersByDateRange } from './order-api.js';
-
-// Removed imports related to single order:
-// import { fetchSingleOrderDetails } from './order-api.js';
-// import { generateHtmlFromJson } from './ui-renderer.js';
 
 // Get references to HTML elements
 const startDateInput = document.getElementById('startDate');
 const endDateInput = document.getElementById('endDate');
 const fetchOrdersByRangeBtn = document.getElementById('fetchOrdersByRangeBtn');
 
-// Removed elements related to single order:
-// const orderIdInput = document.getElementById('orderIdInput');
-// const fetchSingleOrderBtn = document.getElementById('fetchSingleOrderBtn');
-// const downloadAllImagesBtn = document.getElementById('downloadAllImagesBtn');
-// const loadingIndicator = document.getElementById('loadingIndicator'); // This indicator was for single order and general loading, renaming csvGeneratingIndicator for general use.
-// const imageGeneratingIndicator = document.getElementById('imageGeneratingIndicator'); // Removed
-// const ordersContainer = document.getElementById('ordersContainer'); // Removed
-
-const csvGeneratingIndicator = document.getElementById('csvGeneratingIndicator'); // Used for date range fetch loading
+const csvGeneratingIndicator = document.getElementById('csvGeneratingIndicator');
 const copyTableContentsBtn = document.getElementById('copyTableContentsBtn');
 const csvTableContainer = document.getElementById('csvTableContainer');
 
-let lastFetchedOrdersData = null; // Store fetched data for copying
+let lastFetchedDataForDownload = null;
 
-// Set default range dates for CSV export (e.g., last 7 days)
-const defaultEndDate = new Date();
-const defaultStartDate = new Date();
-defaultStartDate.setDate(defaultEndDate.getDate() - 6); // Default to a week range
+// --- Pre-fill date inputs with the current date ---
+const today = new Date();
+const year = today.getFullYear();
+const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed (0-11)
+const day = String(today.getDate()).padStart(2, '0');
+const formattedCurrentDate = `${year}-${month}-${day}`;
 
-startDateInput.value = `${defaultStartDate.getFullYear()}-${String(defaultStartDate.getMonth() + 1).padStart(2, '0')}-${String(defaultStartDate.getDate()).padStart(2, '0')}`;
-endDateInput.value = `${defaultEndDate.getFullYear()}-${String(defaultEndDate.getMonth() + 1).padStart(2, '0')}-${String(defaultEndDate.getDate()).padStart(2, '0')}`;
+startDateInput.value = formattedCurrentDate;
+endDateInput.value = formattedCurrentDate;
+// --- End pre-fill ---
 
-// Event Listener for Fetch Orders for Table button
+
+// Event Listener for Fetch Orders By Range button
 fetchOrdersByRangeBtn.addEventListener('click', async () => {
     const startDate = startDateInput.value;
     const endDate = endDateInput.value;
 
-    const ordersData = await fetchOrdersByDateRange(startDate, endDate, csvGeneratingIndicator, copyTableContentsBtn, csvTableContainer); // csvTableBody is implicitly part of csvTableContainer
+    // Reset previous fetch data
+    lastFetchedDataForDownload = null;
+    csvTableContainer.innerHTML = ''; // Clear previous table
+    csvTableContainer.classList.add('hidden');
 
-    // Store data for copying
-    if (ordersData) {
-        lastFetchedOrdersData = ordersData;
-        copyTableContentsBtn.classList.remove('hidden'); // Show copy button if data exists
-    } else {
-        lastFetchedOrdersData = null;
-        copyTableContentsBtn.classList.add('hidden');
+    try {
+        // fetchOrdersByDateRange now returns an object { orders: [], grandBaseOrderAmount, grandAdditionalTotalAmount }
+        const fetchedResult = await fetchOrdersByDateRange(startDate, endDate, csvGeneratingIndicator, copyTableContentsBtn, csvTableContainer);
+        if (fetchedResult) {
+            lastFetchedDataForDownload = fetchedResult; // Store the entire result object
+        } else {
+            // If fetchOrdersByDateRange returns null (e.g., no orders found or error), ensure data is cleared
+            lastFetchedDataForDownload = null;
+        }
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+        displayMessage('Failed to fetch orders. Please check your network and try again.', 'error');
+        lastFetchedDataForDownload = null;
+    } finally {
+        csvGeneratingIndicator.classList.add('hidden');
     }
 });
 
-// Event Listener for Copy Table Contents button
+// Event Listener for Download Excel File button
 copyTableContentsBtn.addEventListener('click', () => {
-    if (!lastFetchedOrdersData || lastFetchedOrdersData.length === 0) {
-        displayMessage('No data to copy. Please fetch orders first.', 'warning');
+    if (!lastFetchedDataForDownload || lastFetchedDataForDownload.orders.length === 0) {
+        displayMessage('No data to download. Please fetch orders first.', 'warning');
         return;
     }
 
-    let tableContent = "S.No.\tOrder Number\tCustomer Name\tTotal Amount\n"; // Headers, tab-separated
+    let tsvContent = "";
 
-    lastFetchedOrdersData.forEach(row => {
-        // Ensure values are strings to handle any non-string types gracefully
+    // Add grand totals as the first rows in TSV
+    // Ensure grand totals are numeric before toFixed
+    const grandBaseAmount = lastFetchedDataForDownload.grandBaseOrderAmount !== undefined && lastFetchedDataForDownload.grandBaseOrderAmount !== null
+        ? lastFetchedDataForDownload.grandBaseOrderAmount : 0;
+    const grandTotalAmount = lastFetchedDataForDownload.grandAdditionalTotalAmount !== undefined && lastFetchedDataForDownload.grandAdditionalTotalAmount !== null
+        ? lastFetchedDataForDownload.grandAdditionalTotalAmount : 0;
+
+    tsvContent += `Grand Total (Amount - without fees):\t${grandBaseAmount.toFixed(2)}\n`;
+    tsvContent += `Grand Total (Total Amount):\t${grandTotalAmount.toFixed(2)}\n`;
+    tsvContent += "\n"; // Add an empty line for separation
+
+    // Headers for the table data, matching the HTML table order and content
+    tsvContent += "S.No.\tOrder Number\tDate\tCustomer Name\tAmount\tTotal Amount\n";
+
+    lastFetchedDataForDownload.orders.forEach(row => {
         const serialNumber = String(row.serialNumber || '');
         const orderNumber = String(row.orderNumber || '');
+        const deliveryDate = String(row.deliveryDate || 'N/A'); // Already formatted as DD.MM.YYYY
         const customerName = String(row.customerName || '');
-        const totalAmount = (row.totalAmount !== undefined && row.totalAmount !== null) ? row.totalAmount.toFixed(2) : '0.00';
+        const baseOrderAmount = (row.baseOrderAmount !== undefined && row.baseOrderAmount !== null) ? row.baseOrderAmount.toFixed(2) : '0.00';
+        const additionalTotalAmount = (row.additionalTotalAmount !== undefined && row.additionalTotalAmount !== null) ? row.additionalTotalAmount.toFixed(2) : '0.00';
 
-        tableContent += `${serialNumber}\t"${orderNumber}"\t"${customerName}"\t"${totalAmount}"\n`;
+        // Use double quotes for fields that might contain special characters (like tabs or newlines, though less likely in this data)
+        // For TSV, simply tab-separating is usually enough, but quoting provides robustness.
+        tsvContent += `${serialNumber}\t"${orderNumber}"\t"${deliveryDate}"\t"${customerName}"\t"${baseOrderAmount}"\t"${additionalTotalAmount}"\n`;
     });
 
-    // Use the Clipboard API to copy
-    navigator.clipboard.writeText(tableContent)
-        .then(() => {
-            displayMessage('Table contents copied to clipboard. You can now paste into Excel.', 'success');
-        })
-        .catch(err => {
-            console.error('Failed to copy table contents: ', err);
-            displayMessage('Failed to copy table contents. Please try again or copy manually.', 'error');
-        });
-});
+    // Create a Blob from the TSV content
+    const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
 
-// Removed Event Listener for Fetch Single Order button
-// Removed Event Listener for Download All Images button
+    // Create a temporary anchor element to trigger the download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'orders_data.tsv'; // Suggested filename for the download
+    document.body.appendChild(a); // Append to body is good practice for cross-browser compatibility
+    a.click(); // Programmatically click the anchor to trigger download
+    document.body.removeChild(a); // Clean up the temporary element
+
+    URL.revokeObjectURL(url); // Release the object URL to free memory
+
+    displayMessage('Orders data downloaded as orders_data.tsv (opens with Excel).', 'success');
+});
